@@ -1,12 +1,7 @@
-export default function ImageCars(img) {
+import s from "./ImageCard.module.css";
 
-
-return (
-
-<div>
-  <img src="" alt="" />
-</div>
-)
-
-
-}
+export const ImageCard = ({ item: { urls, alt_description } }) => {
+  return (
+    <img className={s.galleryImage} src={urls.small} alt={alt_description} />
+  );
+};

@@ -1,7 +1,15 @@
-import s from "./ImageCard.module.css";
 
-export const ImageCard = ({ item: { urls, alt_description } }) => {
+import css from "./ImageCard.module.css";
+
+export function ImageCard({ img, onClick }) {
+  if (!img || !img.urls) {
+    return null;
+  }
+
   return (
-    <img className={s.galleryImage} src={urls.small} alt={alt_description} />
+    <div onClick={() => onClick(img.urls.full)}>
+      <img src={img.urls.small} alt={img.alt_description} className={css.galleryImage} />
+    </div>
   );
-};
+}
+

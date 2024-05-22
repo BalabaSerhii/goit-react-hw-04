@@ -1,24 +1,21 @@
-///////////////////////////
 import { useEffect, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
 import { nanoid } from "nanoid";
-////////////////////////////
 import { fetchImages } from "../../api";
 import { SearchBar } from "../SearchBar/SearchBar";
-import { ImageGallery } from "../ImageGallery/ImageGallery";
-import { Text } from "../Text/Text";
+import ImageGallery from "../ImageGallery/ImageGallery";
 import { Loader } from "../Loader/Loader";
-////////////////////////////
 import style from "./App.module.css";
-////////////////////////////
-
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import LoadMoreBtn from "../LoadMoreBtn/LoadMoreBtn";
+import ImageModal from "../ImageModal/ImageModal";
 export default function App() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [images, setImages] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [imgUrl, setImgUrl] = useState(null);
+  const [modal, setModal] = useState(false);
 
   useEffect(() => {
     if (!query) return;
@@ -30,13 +27,14 @@ export default function App() {
       try {
         const fetchedData = await fetchImages(query.split("/")[1], page);
         setImages((prevImages) => [...prevImages, ...fetchedData.results]);
-        setTotal(() => setTotal(fetchedData.total));
+        setTotal(fetchedData.total);
       } catch {
         setError(true);
       } finally {
         setLoading(false);
       }
     }
+
     fetchCurrentImages();
   }, [query, page]);
 
@@ -44,34 +42,33 @@ export default function App() {
     setPage(page + 1);
   };
 
-  const handleSearch = async (newQvery) => {
-    if (!total) {
-      toast.error("Oops, there are not data by this query!", {
-        duration: 2000,
-        position: "top-right",
-      });
-    }
+  const handleSearch = async (newQuery) => {
     const qId = nanoid(5);
-    setQuery(`${qId}/${newQvery}`);
+    setQuery(`${qId}/${newQuery}`);
     setPage(1);
     setTotal(0);
     setError(null);
     setImages([]);
   };
 
+  const closeModal = () => {
+    setModal(false);
+  };
+  const showModal = (url) => {
+    setImgUrl(url);
+    setModal(true);
+  };
+
   return (
     <div>
       <SearchBar onSearch={handleSearch} />
-
-      {!query && loading && <Loader />}
-      {!total && <Toaster position="top-right" reverseOrder={false} />}
-      {error && <Text>{"Wrong request, we sorry"}</Text>}
-      {images.length > 0 && <ImageGallery items={images} />}
-      {images.length > 0 && !loading && images.length !== total && (
-        <button className={style.button} onClick={handleLoadMore}>
-          Load more
-        </button>
+      {images.length > 0 && (
+        <ImageGallery images={images} onClick={showModal} />
       )}
+      {loading && <Loader />}
+      {error && <ErrorMessage />}
+      {images.length > 0 && <LoadMoreBtn addPage={handleLoadMore} />}
+      <ImageModal image={imgUrl} state={modal} close={closeModal} />
     </div>
   );
 }

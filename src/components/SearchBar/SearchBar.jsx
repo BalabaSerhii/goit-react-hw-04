@@ -10,6 +10,11 @@ export const SearchBar = ({ onSearch }) => {
   };
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    if (query.trim() === "") {
+      toast.error("Sorry, input is emty. Please tru again!");
+      return;
+    }
     onSearch(query);
     setQuery("");
   };
@@ -32,4 +37,3 @@ export const SearchBar = ({ onSearch }) => {
   );
 };
 
-//required//

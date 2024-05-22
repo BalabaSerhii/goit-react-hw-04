@@ -8,10 +8,15 @@ import style from "./App.module.css";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import LoadMoreBtn from "../LoadMoreBtn/LoadMoreBtn";
 import ImageModal from "../ImageModal/ImageModal";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
+
 export default function App() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [images, setImages] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [imgUrl, setImgUrl] = useState(null);
@@ -54,6 +59,7 @@ export default function App() {
   const closeModal = () => {
     setModal(false);
   };
+
   const showModal = (url) => {
     setImgUrl(url);
     setModal(true);
@@ -62,13 +68,15 @@ export default function App() {
   return (
     <div>
       <SearchBar onSearch={handleSearch} />
+      {error && <ErrorMessage />}
       {images.length > 0 && (
         <ImageGallery images={images} onClick={showModal} />
       )}
       {loading && <Loader />}
-      {error && <ErrorMessage />}
-      {images.length > 0 && <LoadMoreBtn addPage={handleLoadMore} />}
-      <ImageModal image={imgUrl} state={modal} close={closeModal} />
+      {images.length > 0 && !loading && images.length !== total && (
+        <LoadMoreBtn addPage={handleLoadMore} />
+      )}
+      {modal && <ImageModal image={imgUrl} state={modal} close={closeModal} />}
     </div>
   );
 }
